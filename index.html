@@ -68,7 +68,7 @@
   @media (hover: hover) and (pointer: fine) { .tx a:hover { opacity: .7; } }
   svg.el line { pointer-events: none; }
   /* ---------- animazioni ---------- */
-  @media (prefers-reduced-motion: no-preference) {
+  @media all {
     .slide { transition: opacity .8s cubic-bezier(.22,1,.36,1), visibility 0s .8s; }
     .slide.on { transition: opacity .8s cubic-bezier(.22,1,.36,1); }
     .slide.on .a-bg { animation: kb 2.4s cubic-bezier(.22,1,.36,1) both; }
@@ -86,7 +86,7 @@
     @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
     .tx a { transition: opacity 200ms ease; }
   }
-  @media (prefers-reduced-motion: no-preference) {
+  @media all {
     /* transizioni di pagina */
     .slide.esce { visibility: visible; opacity: 1; z-index: 1; transition: none; }
     .slide.entra { z-index: 3; transition: none; opacity: 1; }
@@ -111,8 +111,10 @@
     @keyframes entraIn { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
     @keyframes entraGo { from { clip-path: circle(0% at var(--cx, 50%) var(--cy, 50%)); } to { clip-path: circle(150% at var(--cx, 50%) var(--cy, 50%)); } }
   }
-  @media (prefers-reduced-motion: reduce) { .slide, .slide.on { transition: opacity 250ms ease, visibility 0s 250ms; } .slide.on { transition: opacity 250ms ease; } }
-  @media (prefers-reduced-motion: no-preference) and (hover: none) {
+  /* 11/11/2026: sui tablet niente sfocatura dietro i comandi (pesa sulla GPU sopra i video) */
+  @media (hover: none) { #griglia, #ctrl, #ctrl *, .zona, .zona * { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+    #ctrl, .zona { background: rgba(18,18,18,.72); } #griglia { background: rgba(10,10,10,.97); } }
+  @media (hover: none) {
     .slide.entra.dir-av { animation-name: entraAvT; } .slide.entra.dir-in { animation-name: entraInT; } .slide.entra.dir-go { animation-name: entraGoT; }
     @keyframes entraAvT { from { transform: translateX(100%); } to { transform: none; } }
     @keyframes entraInT { from { transform: translateX(-100%); } to { transform: none; } }
@@ -489,7 +491,9 @@ function griglia(apri) {
   if (!apri && era) { const p = griglia.prima; griglia.prima = null; if (p && p.id === "gr") p.focus(); }
 }
 
-const ridotto = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+// 11/11/2026: le impostazioni "riduci animazioni" / risparmio energetico dei tablet fermavano video e transizioni:
+// in una presentazione da proiettare video e transizioni sono contenuto, quindi non si disattivano più.
+const ridotto = () => false;
 // ---------- slide 1: logo → "Le idee…" → logo … in loop; la freccia va avanti come sempre ----------
 const INTRO = (() => {
   const box = document.querySelector("#p1 .intro"); if (!box) return { avvia() {}, ferma() {} };
@@ -552,7 +556,7 @@ function vai(s, dir, ev) {
   // ciò che è identico alla slide di prima resta fermo
   [...s.children].forEach(el => el.classList.toggle("fermo", el.classList.contains("fisso")));
   if (cur && cur !== s) { const vecchi = new Set([...cur.children].map(firma)); [...s.children].forEach(el => { if (vecchi.has(firma(el))) el.classList.add("fermo"); }); }
-  const prima = cur, anim = !matchMedia("(prefers-reduced-motion: reduce)").matches && prima && prima !== s && prima.classList.contains("on");
+  const prima = cur, anim = !ridotto() && prima && prima !== s && prima.classList.contains("on");
   document.querySelectorAll(".slide.esce, .slide.entra").forEach(x => x.getAnimations().forEach(a => a.finish()));
   all.forEach(x => x.classList.remove("esce", "entra", "dir-av", "dir-in", "dir-go", "dir-fade"));
   if (anim) {
