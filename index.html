@@ -56,6 +56,8 @@
   .tx { pointer-events: none; overflow: visible; }
   .tx p { white-space: pre-wrap; word-wrap: break-word; }
   .tx a { pointer-events: auto; cursor: pointer; color: inherit; }
+  /* 12/11/2026: le voci dei menu non vanno mai a capo (senza SF Pro, es. Windows, "INNOVA Engineering" finiva sopra "SINERGIA") */
+  .tx p:has(> a[data-go]) { white-space: nowrap; }
   /* accessibilità (9/11/2026) */
   .tx a:focus-visible { outline: 4px solid #fff; outline-offset: 8px; border-radius: 6px; }
   .slide:focus { outline: none; }
